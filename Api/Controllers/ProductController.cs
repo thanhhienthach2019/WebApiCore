@@ -16,7 +16,7 @@ namespace Api.Controllers
             _unitOfWork = unitOfWork;
         }
         // GET: api/Product
-        [HttpGet("getProduct")]
+        [HttpGet("products")]
         [AllowAnonymous]        
         public async Task<IActionResult> GetProducts()
         {
@@ -25,7 +25,7 @@ namespace Api.Controllers
         }
 
         // GET: api/Product/5        
-        [HttpGet("getProduct/{id}")]
+        [HttpGet("products/{id}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetProduct(int id)
         {
@@ -38,7 +38,7 @@ namespace Api.Controllers
         }
 
         // POST: api/Product        
-        [HttpPost("addProduct")]
+        [HttpPost("products")]
         [Authorize]
         public async Task<IActionResult> AddProduct([FromBody] Product product)
         {
@@ -54,7 +54,7 @@ namespace Api.Controllers
         }
 
         // PUT: api/Product/5
-        [HttpPut("updateProduct/{id}")]
+        [HttpPut("products/{id}")]
         [Authorize]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
@@ -79,7 +79,7 @@ namespace Api.Controllers
         }
 
         // DELETE: api/Product/5
-        [HttpDelete("deleteProduct/{id}")]
+        [HttpDelete("products/{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteProduct(int id)
         {

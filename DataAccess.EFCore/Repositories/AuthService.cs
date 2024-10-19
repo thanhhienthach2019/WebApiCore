@@ -24,7 +24,8 @@ namespace DataAccess.EFCore.Repositories
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
             };
 
             var keyValue = _configuration["Jwt:Key"];
@@ -40,7 +41,7 @@ namespace DataAccess.EFCore.Repositories
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(60),  // Token expires in 5 minutes
+                expires: DateTime.Now.AddMinutes(1),  // Token expires in 5 minutes
                 signingCredentials: creds
             );
 

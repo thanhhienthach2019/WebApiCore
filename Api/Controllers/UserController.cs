@@ -78,6 +78,7 @@ namespace Api.Controllers
         {
             int expiresDay = 7;
             int loginExpiryTime = 1;
+ 
             var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
                 return Unauthorized("Invalid credentials");
@@ -97,7 +98,7 @@ namespace Api.Controllers
                 // Generate JWT token
             var token = await _authService.GenerateJwtToken(user);
             var refreshToken = await _authService.GenerateRefreshToken(user, expiresDay);
-
+          
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
@@ -106,7 +107,14 @@ namespace Api.Controllers
                 Expires = DateTime.UtcNow.AddDays(expiresDay)
             });
 
-            return Ok(new { Token = token, RefreshToken = refreshToken });
+            return Ok(new { Token = token, RefreshToken = refreshToken, Message = "Đăng nhập thành công" });
+        }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            Response.Cookies.Delete("jwtToken");
+            Response.Cookies.Delete("refreshToken");
+            return Ok(new { Message = "Đăng xuất thành công." });
         }
         [HttpPost("verify-2fa-login")]
         public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorDto verifyDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
@@ -122,6 +130,7 @@ namespace Api.Controllers
             // Generate JWT token
             var token = await _authService.GenerateJwtToken(user);
             var refreshToken = await _authService.GenerateRefreshToken(user, timeExpiresDays);
+          
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,  // Prevent access via JavaScript
@@ -134,7 +143,7 @@ namespace Api.Controllers
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return Ok(new { Token = token, RefreshToken = refreshToken });
+            return Ok(new { Token = token, RefreshToken = refreshToken, Message = "Xác thực thành công" });
         }
         [HttpPost("refreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)

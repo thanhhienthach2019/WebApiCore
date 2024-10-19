@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Api\Api.csproj", "{D5014D9A-3AB0-4160-B5AE-8A609E9AA2F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess.EFCore", "DataAccess.EFCore\DataAccess.EFCore.csproj", "{F7ADF305-E122-4865-85FD-63CD3C53EFEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{2718DD66-35FE-44DE-9BD6-4C94DA9A5E34}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5014D9A-3AB0-4160-B5AE-8A609E9AA2F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5014D9A-3AB0-4160-B5AE-8A609E9AA2F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5014D9A-3AB0-4160-B5AE-8A609E9AA2F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5014D9A-3AB0-4160-B5AE-8A609E9AA2F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7ADF305-E122-4865-85FD-63CD3C53EFEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7ADF305-E122-4865-85FD-63CD3C53EFEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7ADF305-E122-4865-85FD-63CD3C53EFEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7ADF305-E122-4865-85FD-63CD3C53EFEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2718DD66-35FE-44DE-9BD6-4C94DA9A5E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2718DD66-35FE-44DE-9BD6-4C94DA9A5E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2718DD66-35FE-44DE-9BD6-4C94DA9A5E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2718DD66-35FE-44DE-9BD6-4C94DA9A5E34}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D1C548C-E68A-401F-8F81-889C36E0856B}
+	EndGlobalSection
+EndGlobal

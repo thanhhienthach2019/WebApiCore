@@ -1,0 +1,9 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\DataAccess.EFCore",
+    "\\DataAccess.EFCore\\UnitOfWork"
+  ],
+  "SelectedNode": "\\DataAccess.EFCore\\UnitOfWork\\UnitOfWork.cs",
+  "PreviewInSolutionExplorer": false
+}

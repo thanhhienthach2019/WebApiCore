@@ -93,7 +93,7 @@ namespace Api.Controllers
                 //$"Your verification code is: {user.TwoFactorCodeLogin}");
 
                 //return Ok(new { Message = "Two-factor code login has been sent. Please verify your email." });
-                return Ok(new { Message = "Mã xác thực đã được gửi đến email của bạn.", requiresTwoFactor = true, expiryTime = loginExpiryTime });
+                return Ok(new { requiresTwoFactor = true, expiryTime = loginExpiryTime });
             }
                 // Generate JWT token
             var token = await _authService.GenerateJwtToken(user);
@@ -102,12 +102,12 @@ namespace Api.Controllers
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                Secure = false,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(expiresDay)
             });
 
-            return Ok(new { Token = token, RefreshToken = refreshToken, Message = "Đăng nhập thành công" });
+            return Ok(new { Token = token });
         }
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -134,8 +134,8 @@ namespace Api.Controllers
             Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,  // Prevent access via JavaScript
-                Secure = true,    // Ensure the cookie is only sent over HTTPS
-                SameSite = (SameSiteMode)SameSite.Strict, // Protect against CSRF
+                Secure = false,    // Ensure the cookie is only sent over HTTPS
+                SameSite = SameSiteMode.None, // Protect against CSRF
                 Expires = DateTime.UtcNow.AddDays(timeExpiresDays) // Cookie expiry time
             });
             //Update deviceFingerprint to database
@@ -143,7 +143,7 @@ namespace Api.Controllers
             await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
 
-            return Ok(new { Token = token, RefreshToken = refreshToken, Message = "Xác thực thành công" });
+            return Ok(new { Token = token, StatusLogin = true });
         }
         [HttpPost("refreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)

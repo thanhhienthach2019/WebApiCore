@@ -14,6 +14,8 @@ namespace DataAccess.EFCore
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Token> Tokens { get; set; }
+        public DbSet<UserAgent> UserAgents { get; set; }
 
     }
 }

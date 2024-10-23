@@ -11,6 +11,7 @@ namespace DataAccess.EFCore.UnitOfWork
         public IUserRepository Users { get; private set; }
         public IProductRepository Products { get; private set; }
         public ICategoryRepository Categories { get; private set; }
+        public ITokenRepository Tokens { get; private set; }
 
         public UnitOfWork(ApplicationContext context)
         {
@@ -20,6 +21,7 @@ namespace DataAccess.EFCore.UnitOfWork
             Users = new UserRepository(_context);
             Products = new ProductRepository(_context);
             Categories = new CategoryRepository(_context);
+            Tokens = new TokenRepository(_context);
         }
 
         public int Complete()

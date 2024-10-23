@@ -145,17 +145,27 @@ namespace Api.Controllers
 
             return Ok(new { Token = token, StatusLogin = true });
         }
-        [HttpPost("refreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto request)
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
         {
-            var newAccessToken = await _authService.RefreshToken(request.RefreshToken);
+            // Lấy refresh token từ cookie
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized("Refresh token is missing.");
+            }
+
+            // Gọi auth service để làm mới access token
+            var newAccessToken = await _authService.RefreshToken(refreshToken);
 
             if (newAccessToken == null)
             {
-                return Unauthorized();  
+                return Unauthorized("Invalid refresh token.");
             }
 
-            return Ok(new { accessToken = newAccessToken });  
+            return Ok(new { accessToken = newAccessToken });  // Trả về access token mới
         }
+
     }
 }

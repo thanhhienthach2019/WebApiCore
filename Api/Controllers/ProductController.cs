@@ -17,7 +17,8 @@ namespace Api.Controllers
         }
         // GET: api/Product
         [HttpGet]
-        [AllowAnonymous]        
+        //[AllowAnonymous]        
+        [Authorize]
         public async Task<IActionResult> GetProducts()
         {
             var products = await _unitOfWork.Products.GetAllAsync();

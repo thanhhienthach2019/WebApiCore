@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Domain.DataTypes;
+using Domain.DTO;
+using Domain.Entities;
 
 namespace Domain.Interfaces
 {
@@ -9,5 +11,8 @@ namespace Domain.Interfaces
         Task<bool> ValidateTwoFactorLoginCodeAsync(User user, string code);
         Task<string> RefreshToken(string refreshToken);
         Task<string> GenerateRefreshToken(User user, int timeExpires);
+        Task<UserData> LoginAsync(AuthDto request, UserAgentData userAgentData);
+        Task<UserData> RegistrationAsync(AuthDto request, UserAgentData userAgentData);
+        Task<string> LogoutAsync(string refreshToken);
     }
 }

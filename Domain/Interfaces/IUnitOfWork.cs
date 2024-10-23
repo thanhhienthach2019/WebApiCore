@@ -7,6 +7,7 @@
         IUserRepository Users { get; }
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
+        ITokenRepository Tokens { get; }
         int Complete();
         Task<int> CompleteAsync();
     }

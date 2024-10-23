@@ -1,6 +1,7 @@
 ﻿using DataAccess.EFCore;
 using DataAccess.EFCore.Extension;
 using DataAccess.EFCore.Repositories;
+using DataAccess.EFCore.Repositories.Service;
 using DataAccess.EFCore.UnitOfWork;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -25,7 +26,8 @@ builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericReposi
 builder.Services.AddTransient<IDeveloperRepository, DeveloperRepository>();
 builder.Services.AddTransient<IProjectRepository, ProjectRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
-builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<TokensService>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
@@ -40,18 +42,21 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-        ClockSkew = TimeSpan.Zero,
-        RequireExpirationTime = true,
-    };
+    // Thiết lập yêu cầu HTTPS
+    options.RequireHttpsMetadata = true;
+    options.TokenValidationParameters = TokensService.GetTokenValidationParameters(true);
+    //options.TokenValidationParameters = new TokenValidationParameters
+    //{
+    //    ValidateIssuer = false,
+    //    ValidateAudience = false,
+    //    ValidateLifetime = true,
+    //    ValidateIssuerSigningKey = true,
+    //    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+    //    ValidAudience = builder.Configuration["Jwt:Audience"],
+    //    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+    //    ClockSkew = TimeSpan.Zero,
+    //    RequireExpirationTime = true,
+    //};
 });
 builder.Services.AddCors(options =>
 {
@@ -142,7 +147,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseMiddleware<JwtMiddleware>();
+//app.UseMiddleware<JwtMiddleware>();
 
 app.UseRouting();
 

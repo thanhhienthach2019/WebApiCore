@@ -1,0 +1,17 @@
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\DataAccess.EFCore.deps.json
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\DataAccess.EFCore.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\DataAccess.EFCore.pdb
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\Domain.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\Domain.pdb
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.csproj.AssemblyReference.cache
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.GeneratedMSBuildEditorConfig.editorconfig
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.AssemblyInfoInputs.cache
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.AssemblyInfo.cs
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.csproj.CoreCompileInputs.cache
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.csproj.CopyComplete
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\refint\DataAccess.EFCore.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.pdb
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\ref\DataAccess.EFCore.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net7.0\DataAccess.EFCore.runtimeconfig.json
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net7.0\DataAccess.EFCore.genruntimeconfig.cache

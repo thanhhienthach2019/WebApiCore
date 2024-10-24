@@ -7,7 +7,7 @@ namespace Domain.Entities
         [Key]
         [Required]
         public Guid Id { get; set; }
-        public string Username { get; set; }
+        public string? Username { get; set; }
         [Required]
         public string PasswordHash { get; set; }
         [EmailAddress]
@@ -21,6 +21,6 @@ namespace Domain.Entities
         public string? RefreshToken { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public bool? IsActiveToken { get; set; }
-        public List<Token> Tokens { get; set; }
+        public virtual ICollection<Token> Tokens { get; set; } = new List<Token>();
     }
 }

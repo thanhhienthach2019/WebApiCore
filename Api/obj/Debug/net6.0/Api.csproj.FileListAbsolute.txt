@@ -92,7 +92,6 @@ E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Flurl.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Flurl.Http.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Google.Protobuf.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Humanizer.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\K4os.Compression.LZ4.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\K4os.Compression.LZ4.Streams.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\K4os.Hash.xxHash.dll
@@ -101,18 +100,14 @@ E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Bcl.TimeProvider.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Abstractions.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Design.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.EntityFrameworkCore.Relational.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Caching.Abstractions.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Caching.Memory.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Configuration.Abstractions.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.DependencyModel.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.FileProviders.Abstractions.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Hosting.Abstractions.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Logging.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Logging.Abstractions.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Options.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Primitives.dll
@@ -124,14 +119,12 @@ E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.OpenApi.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Win32.SystemEvents.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Mono.TextTemplating.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\MySql.Data.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\MySql.EntityFrameworkCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Newtonsoft.Json.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Swashbuckle.AspNetCore.Swagger.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\System.CodeDom.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\System.Configuration.ConfigurationManager.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\System.Diagnostics.DiagnosticSource.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\System.Drawing.Common.dll
@@ -180,3 +173,5 @@ E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\obj\
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\obj\Debug\net6.0\Api.pdb
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\obj\Debug\net6.0\Api.genruntimeconfig.cache
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\obj\Debug\net6.0\ref\Api.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Caching.Abstractions.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\Api\bin\Debug\net6.0\Microsoft.Extensions.Logging.dll

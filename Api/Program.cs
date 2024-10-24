@@ -1,15 +1,14 @@
 ﻿using DataAccess.EFCore;
-using DataAccess.EFCore.Extension;
 using DataAccess.EFCore.Repositories;
+using DataAccess.EFCore.Repositories.BackgroundServices;
 using DataAccess.EFCore.Repositories.Service;
 using DataAccess.EFCore.UnitOfWork;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +32,8 @@ builder.Services.AddTransient<ICategoryRepository, CategoryRepository>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddScoped<ExpiredTokenCleaner>();
 
 // Configure JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -58,12 +59,13 @@ builder.Services.AddAuthentication(options =>
     //    RequireExpirationTime = true,
     //};
 });
+var clientUrl = builder.Configuration.GetSection("URLS").GetChildren().First(c => c.Key.Equals("ClientUrl")).Value;
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")
+            builder.WithOrigins(clientUrl)
                    //.AllowAnyOrigin()
                    .AllowAnyMethod()
                    .AllowAnyHeader()
@@ -71,7 +73,11 @@ builder.Services.AddCors(options =>
 
         });
 });
-
+builder.Services.AddCookiePolicy(options =>
+{
+    options.HttpOnly = HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddControllers();
 
@@ -152,6 +158,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseCookiePolicy();
 
 app.UseAuthentication(); // Ensure that JWT authentication is used
 

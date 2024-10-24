@@ -31,7 +31,7 @@ namespace DataAccess.EFCore.Repositories.Service
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
+                //new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
             };
 

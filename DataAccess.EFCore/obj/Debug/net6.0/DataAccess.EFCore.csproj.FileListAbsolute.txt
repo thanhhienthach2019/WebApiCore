@@ -14,7 +14,6 @@ C:\Users\84826\Downloads\project-learning-main\project-learning-main\RepositoryP
 C:\Users\84826\Downloads\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\DataAccess.EFCore.pdb
 C:\Users\84826\Downloads\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\ref\DataAccess.EFCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\DataAccess.EFCore.deps.json
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\DataAccess.EFCore.runtimeconfig.json
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\DataAccess.EFCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\DataAccess.EFCore.pdb
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\Domain.dll
@@ -28,5 +27,6 @@ E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAcce
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\DataAccess.EFCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\refint\DataAccess.EFCore.dll
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\DataAccess.EFCore.pdb
-E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\DataAccess.EFCore.genruntimeconfig.cache
 E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\ref\DataAccess.EFCore.dll
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\bin\Debug\net6.0\DataAccess.EFCore.runtimeconfig.json
+E:\MrHien\project-learning-main\project-learning-main\RepositoryPattern\DataAccess.EFCore\obj\Debug\net6.0\DataAccess.EFCore.genruntimeconfig.cache

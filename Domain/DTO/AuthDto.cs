@@ -19,5 +19,8 @@ namespace Domain.DTO
         [JsonProperty("Password")]
         [MinLength(4)]
         public string Password { get; set; }
+
+        [JsonRequired]               
+        public string Fingerprint { get; set; }
     }
 }

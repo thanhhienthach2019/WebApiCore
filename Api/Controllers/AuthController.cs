@@ -50,15 +50,57 @@ namespace Api.Controllers
         {
             try
             {
+                int loginExpiryTime = 5;
                 var userAgentData = Utilities.GetUserAgentData(this.Request.Headers["User-Agent"]);
 
                 _logger.LogInformation("Start login");
                 var userData = await _authService.LoginAsync(request, userAgentData);
 
+                if (string.IsNullOrEmpty(userData.DeviceFingerprint) || userData.DeviceFingerprint != request.Fingerprint)
+                {
+                    var user = new User
+                    {
+                        TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString(),
+                        TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime)
+                    };                                        
+                    await _unitOfWork.Users.UpdateAsync(user);
+                    await _unitOfWork.CompleteAsync();
+                    return this.Ok(new { userDataSend = userData, requiresTwoFactor = true, expiryTime = loginExpiryTime });
+                }
+
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), userData);
 
-                return this.Ok(userData);
+                return this.Ok(new { userDataSend = userData});
+            }
+            catch (Exception e)
+            {
+                return this.BadRequest($"Error:{e.Message}");
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost("verify-2fa-login")]
+        public async Task<ActionResult<UserData>> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorDto request, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
+        {
+            try
+            {                
+                var userAgentData = Utilities.GetUserAgentData(this.Request.Headers["User-Agent"]);
+                if (userAgentData == null)
+                    return Unauthorized("User not found");
+
+                _logger.LogInformation("Start VerifyTwoFactorLogin");
+                var twoFactor = await _authService.ValidateTwoFactorLoginCodeAsync(request, userAgentData);
+                                              
+                _logger.LogInformation("Add refresh token cookie");
+                this.AddRefreshTokenCookie(new Token(), twoFactor);
+                var user = new User
+                {
+                    DeviceFingerprint = deviceFingerprint,
+                };                
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.CompleteAsync();
+
+                return Ok(new { StatusLogin = true });
             }
             catch (Exception e)
             {

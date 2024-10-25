@@ -8,6 +8,7 @@ namespace Domain.Interfaces
     {
         Task<string> GenerateJwtToken(User user);
         Task<bool> ValidateTwoFactorRegisterCodeAsync(User user, string code);
+        Task<UserData> ValidateTwoFactorLoginCodeAsync(VerifyTwoFactorDto request, UserAgentData userAgentData);
         Task<bool> ValidateTwoFactorLoginCodeAsync(User user, string code);
         Task<string> RefreshToken(string refreshToken);
         Task<string> GenerateRefreshToken(User user, int timeExpires);

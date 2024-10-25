@@ -35,11 +35,11 @@ namespace DataAccess.EFCore.Repositories.Service
 
             if (userToken is not null)
             {
-                var now = DateTime.UtcNow;
+                var now = DateTime.Now;
 
                 userToken.RefreshToken = refreshToken;
                 userToken.Created = now;
-                userToken.Expired = now.AddMinutes(userToken.LifeTime);
+                userToken.Expired = now.AddDays(userToken.LifeTime);
 
                 await _unitOfWork.CompleteAsync();
             }
@@ -128,8 +128,8 @@ namespace DataAccess.EFCore.Repositories.Service
 
         private string GenerateAccessToken(UserDto user)
         {
-            var now = DateTime.UtcNow;
-            var expires = now.Add(TimeSpan.FromSeconds(AccessTokenOptions.LIFETIME));
+            var now = DateTime.Now;
+            var expires = now.AddMinutes(AccessTokenOptions.LIFETIME);
 
             var claims = new List<Claim>
             {

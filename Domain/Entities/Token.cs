@@ -35,7 +35,7 @@ namespace Domain.Entities
 
         public Token()
         {
-            this.Expired = this.Created.AddMinutes(this.LifeTime);
+            this.Expired = this.Created.AddDays(this.LifeTime);
         }
     }
 }

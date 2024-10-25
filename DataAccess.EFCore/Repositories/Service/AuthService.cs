@@ -103,6 +103,30 @@ namespace DataAccess.EFCore.Repositories.Service
         {
             return user.TwoFactorCodeLogin == code && user.TwoFactorLoginExpiryTime > DateTime.Now;
         }
+        public async Task<UserData> ValidateTwoFactorLoginCodeAsync(VerifyTwoFactorDto request, UserAgentData userAgentData)
+        {
+            //return user.TwoFactorCodeLogin == code && user.TwoFactorLoginExpiryTime > DateTime.Now;
+            var getUserTwoFactor = await _unitOfWork.Users.FindAsync(u => u.TwoFactorCodeLogin.Equals(request.TwoFactorCode) && u.TwoFactorLoginExpiryTime > DateTime.Now);
+            var user = getUserTwoFactor.FirstOrDefault();
+            if (user is null)
+            {
+                _logger.LogError("Invalid or expired 2FA code!");
+                throw new Exception("Invalid or expired 2FA code!");
+            }
+          
+            var userDto = new UserDto { Id = user.Id, Email = user.Email };
+
+            _logger.LogInformation("Generate tokens");
+            var tokens = _tokensService.GenerateTokens(userDto);
+
+            _logger.LogInformation("Save refresh token");
+            await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData);
+
+            var userData = new UserData { UserDto = userDto, TokensData = tokens };
+
+            return userData;
+            
+        }
         public async Task<UserData> LoginAsync(AuthDto request, UserAgentData userAgentData)
         {
             var getUser = await _unitOfWork.Users.FindAsync(u => u.Email.Equals(request.Email));

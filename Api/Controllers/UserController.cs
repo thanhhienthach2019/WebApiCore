@@ -56,10 +56,10 @@ namespace Api.Controllers
         [HttpPost("verify-2fa-register")]
         public async Task<IActionResult> VerifyTwoFactorRegister([FromBody] VerifyTwoFactorDto verifyDto)
         {
-            if (!_pendingUsers.ContainsKey(verifyDto.Username))
+            if (!_pendingUsers.ContainsKey(verifyDto.Email))
                 return Unauthorized("User not found or registration has expired");
 
-            var user = _pendingUsers[verifyDto.Username];
+            var user = _pendingUsers[verifyDto.Email];
 
             if (!await _authService.ValidateTwoFactorRegisterCodeAsync(user, verifyDto.TwoFactorCode))
                 return Unauthorized("Invalid or expired 2FA code");
@@ -69,7 +69,7 @@ namespace Api.Controllers
             await _unitOfWork.CompleteAsync();
 
             // Remove the user from the pending list
-            _pendingUsers.Remove(verifyDto.Username);
+            _pendingUsers.Remove(verifyDto.Email);
 
             return Ok(new { Message = "Registration successful. You can now log in." });
         }
@@ -120,7 +120,7 @@ namespace Api.Controllers
         public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorDto verifyDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
         {
             int timeExpiresDays = 7;
-            var user = await _unitOfWork.Users.GetByUsernameAsync(verifyDto.Username);
+            var user = await _unitOfWork.Users.GetByUsernameAsync(verifyDto.Email);
             if (user == null)
                 return Unauthorized("User not found");
 

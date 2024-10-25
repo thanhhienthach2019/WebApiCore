@@ -10,6 +10,9 @@ namespace Domain.DataTypes
     public class UserData
     {
         public UserDto UserDto { get; set; }
-        public TokensData TokensData { get; set; }
+        public TokensData TokensData { get; set; }        
+        public string? TwoFactorCodeLogin { get; set; }
+        public string? DeviceFingerprint { get; set; }
+        public DateTime? TwoFactorLoginExpiryTime { get; set; }
     }
 }

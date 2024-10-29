@@ -12,7 +12,7 @@ namespace Domain.Interfaces
     {
         Task<Token?> GetTokenByUserAndUserAgentAsync(Guid userId, UserAgentData userAgentData);
         Task<User?> GetUserByRefreshTokenAndUserAgentAsync(TokensData tokens, UserAgentData userAgentData);
-        Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser);
+        Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser, string DeviceFingerprint);
         Task<IEnumerable<Token>> GetExpiredTokensAsync();
     }
 }

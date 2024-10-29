@@ -9,8 +9,8 @@ namespace DataAccess.EFCore
 {
     public class AccessTokenOptions
     {
-        public const string ISSUER = "MyAuthServer"; 
-        public const string AUDIENCE = "MyAuthClient"; 
+        public const string ISSUER = "_hien_key/authServer"; 
+        public const string AUDIENCE = "_hien_key/authClient"; 
         private const string KEY = "hienKeyToken/k64zY35P6gVRuHpKHkF4uHNs5YI/5EgEN3NNY0tncXU="; 
         public const int LIFETIME = 30; 
 

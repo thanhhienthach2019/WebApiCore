@@ -114,15 +114,8 @@ namespace DataAccess.EFCore.Repositories.Service
                 throw new Exception("Invalid or expired 2FA code!");
             }
           
-            var userDto = new UserDto { Id = user.Id, Email = user.Email };
-
-            _logger.LogInformation("Generate tokens");
-            var tokens = _tokensService.GenerateTokens(userDto);
-
-            _logger.LogInformation("Save refresh token");
-            await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData);
-
-            var userData = new UserData { UserDto = userDto, TokensData = tokens };
+            var userDto = new UserDto { Id = user.Id, Email = user.Email };           
+            var userData = new UserData { UserDto = userDto };
 
             return userData;
             
@@ -143,17 +136,22 @@ namespace DataAccess.EFCore.Repositories.Service
                 throw new Exception("Invalid password!");
             }
 
-            var userDto = new UserDto { Id = user.Id, Email = user.Email };
+            var userDto = new UserDto { Id = user.Id, Email = user.Email };            
 
-            _logger.LogInformation("Generate tokens");
-            var tokens = _tokensService.GenerateTokens(userDto);
-
-            _logger.LogInformation("Save refresh token");
-            await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData);
-
-            var userData = new UserData { UserDto = userDto, TokensData = tokens };
+            var userData = new UserData { UserDto = userDto };
 
             return userData;
+        }
+        public async Task<User> GetUserAsync(Guid Id)
+        {
+            var getUser = await _unitOfWork.Users.FindAsync(u => u.Id.Equals(Id));
+            var user = getUser.FirstOrDefault();
+            if (user is null)
+            {
+                _logger.LogError("User with such id is not found!");
+                throw new Exception("User with such id is not found!");
+            }            
+            return user;
         }
         public async Task<string> LogoutAsync(string refreshToken)
         {
@@ -193,14 +191,7 @@ namespace DataAccess.EFCore.Repositories.Service
 
             var addedUserId = userEntry.Id;
             var userDto = new UserDto { Id = addedUserId, Email = request.Email };
-
-            _logger.LogInformation("Generate tokens");
-            var tokens = _tokensService.GenerateTokens(userDto);
-
-            _logger.LogInformation("Save refresh token");
-            await _tokensService.SaveRefreshTokenAsync(addedUserId, tokens.RefreshJwt, userAgentData);
-
-            var userDataEntitiest = new UserData { UserDto = userDto, TokensData = tokens };
+            var userDataEntitiest = new UserData { UserDto = userDto };
 
             return userDataEntitiest;
         }

@@ -21,5 +21,7 @@ namespace Domain.Entities
 
         [Required]
         public string Browser { get; set; }
+        [Required]
+        public string DeviceFingerprint { get; set; }
     }
 }

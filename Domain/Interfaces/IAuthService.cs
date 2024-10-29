@@ -14,6 +14,7 @@ namespace Domain.Interfaces
         Task<string> GenerateRefreshToken(User user, int timeExpires);
         Task<UserData> LoginAsync(AuthDto request, UserAgentData userAgentData);
         Task<UserData> RegistrationAsync(AuthDto request, UserAgentData userAgentData);
+        Task<User> GetUserAsync(Guid Id);
         Task<string> LogoutAsync(string refreshToken);
     }
 }

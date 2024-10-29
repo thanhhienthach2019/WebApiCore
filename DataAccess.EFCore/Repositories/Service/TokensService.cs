@@ -35,17 +35,17 @@ namespace DataAccess.EFCore.Repositories.Service
 
             if (userToken is not null)
             {
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
 
                 userToken.RefreshToken = refreshToken;
                 userToken.Created = now;
-                userToken.Expired = now.AddDays(userToken.LifeTime);
+                userToken.Expired = now.AddMinutes(userToken.LifeTime);
 
                 await _unitOfWork.CompleteAsync();
             }
             else
             {
-                await _unitOfWork.Tokens.AddTokenAsync(userId, refreshToken, userAgentData.OS, userAgentData.Browser);
+                await _unitOfWork.Tokens.AddTokenAsync(userId, refreshToken, userAgentData.OS, userAgentData.Browser, userAgentData.DeviceFingerprint);
                 await _unitOfWork.CompleteAsync();
             }
         }
@@ -76,7 +76,7 @@ namespace DataAccess.EFCore.Repositories.Service
             if (token == null)
             {
                 _logger.LogError("In database refresh token is not found!");
-                throw new Exception("Не удалось найти рефреш-токен в базе данных!");
+                throw new Exception("In database refresh token is not found!");
             }
 
             await _unitOfWork.Tokens.RemoveAsync(token);
@@ -118,30 +118,29 @@ namespace DataAccess.EFCore.Repositories.Service
                 throw new Exception("In database refresh token is not found!");
             }
 
-            var userDto = new UserDto { Id = user.Id, Email = user.Email };
+            var userDto = new UserDto { Id = user.Id, Email = user.Email };        
 
-            _logger.LogInformation("Generate tokens");
-            var tokensDto = GenerateTokens(userDto);
-
-            return new UserData { UserDto = userDto, TokensData = tokensDto };
+            return new UserData { UserDto = userDto };
         }
 
         private string GenerateAccessToken(UserDto user)
         {
-            var now = DateTime.Now;
-            var expires = now.AddMinutes(AccessTokenOptions.LIFETIME);
+            var now = DateTime.UtcNow;
+            var expires = now.Add(TimeSpan.FromSeconds(AccessTokenOptions.LIFETIME));
 
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Email, user.Email)
+                new(ClaimTypes.Email, user.Email),                              
             };
 
-            var jwt = new JwtSecurityToken(AccessTokenOptions.ISSUER,
-                AccessTokenOptions.AUDIENCE,
-                claims,
-                expires: expires,
-                signingCredentials: new SigningCredentials(AccessTokenOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+            var jwt = new JwtSecurityToken(
+                issuer: AccessTokenOptions.ISSUER, 
+                audience: AccessTokenOptions.AUDIENCE, 
+                claims: claims, 
+                expires: expires, 
+                signingCredentials: new SigningCredentials(AccessTokenOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256) // Chữ ký
+            );
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
@@ -151,7 +150,10 @@ namespace DataAccess.EFCore.Repositories.Service
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(), out var _);
+            var securityToken = (JwtSecurityToken)tokenHandler.ReadToken(accessToken);
+            var claimValue = securityToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(), out var validatedToken);
 
             var claims = claimsPrincipal.Claims.ToList();
 
@@ -167,16 +169,16 @@ namespace DataAccess.EFCore.Repositories.Service
                 return false;
             }
 
-            var userExist = await _unitOfWork.Users.AnyAsync(new Guid(userIdClaim.Value), userEmailClaim.Value);
+            var userExist = await _unitOfWork.Users.AnyAsync(Guid.Parse(userIdClaim.Value), userEmailClaim.Value);
             if (!userExist)
             {
                 return false;
             }
 
             return true;
-        }
-        public static TokenValidationParameters GetTokenValidationParameters(bool validateLifetime = false) =>
-       new()
+        }       
+
+        public static TokenValidationParameters GetTokenValidationParameters(bool validateLifetime = false) => new()
        {
            ValidateIssuer = true,
            ValidIssuer = AccessTokenOptions.ISSUER,
@@ -185,10 +187,10 @@ namespace DataAccess.EFCore.Repositories.Service
            ValidAudience = AccessTokenOptions.AUDIENCE,
 
            ClockSkew = TimeSpan.Zero,
-
            ValidateLifetime = validateLifetime,
-           IssuerSigningKey = AccessTokenOptions.GetSymmetricSecurityKey(),
-           ValidateIssuerSigningKey = true
+
+           ValidateIssuerSigningKey = true,
+           IssuerSigningKey = AccessTokenOptions.GetSymmetricSecurityKey()
        };
         private async Task<bool> ValidateRefreshTokenAsync(string refreshToken)
         {

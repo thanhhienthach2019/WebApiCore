@@ -19,7 +19,7 @@ namespace DataAccess.EFCore.Repositories
                                  .Include(t => t.UserAgent) // Đảm bảo rằng UserAgent đã được include
                                  .FirstOrDefaultAsync(t => t.UserID.Equals(userId)
                                                            && t.UserAgent.OS.Equals(userAgentData.OS)
-
+                                                           && t.UserAgent.DeviceFingerprint.Equals(userAgentData.DeviceFingerprint)
                                                            && t.UserAgent.Browser.Equals(userAgentData.Browser));
         }
         public async Task<User?> GetUserByRefreshTokenAndUserAgentAsync(TokensData tokens, UserAgentData userAgentData)
@@ -28,18 +28,19 @@ namespace DataAccess.EFCore.Repositories
                 .Include(t => t.UserAgent)
                                  .Where(t => t.RefreshToken.Equals(tokens.RefreshJwt)
                                              && t.UserAgent.OS.Equals(userAgentData.OS)
+                                             && t.UserAgent.DeviceFingerprint.Equals(userAgentData.DeviceFingerprint)
                                              && t.UserAgent.Browser.Equals(userAgentData.Browser))
                                  .Select(t => t.User)
                                  .FirstOrDefaultAsync(); ;
 
             return user;
         }
-        public async Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser)
+        public async Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser, string DeviceFingerprint)
         {
             var newToken = new Token
             {
                 UserID = userId,
-                RefreshToken = refreshToken,
+                RefreshToken = refreshToken,                
             };
 
             await _context.Tokens.AddAsync(newToken);
@@ -47,7 +48,8 @@ namespace DataAccess.EFCore.Repositories
             {
                 Id = newToken.Id, // Dùng Id của token đã thêm
                 OS = OS,
-                Browser = Browser
+                Browser = Browser,
+                DeviceFingerprint = DeviceFingerprint
             });
         }
         public async Task<IEnumerable<Token>> GetExpiredTokensAsync()

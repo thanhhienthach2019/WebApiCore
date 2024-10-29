@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Flurl.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -13,13 +14,36 @@ namespace Api.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
         private readonly IEmailService _emailService;
+        private readonly ILogger<UserController> _logger;
 
         private static Dictionary<string, User> _pendingUsers = new Dictionary<string, User>();
-        public UserController(IUnitOfWork unitOfWork, IAuthService authService, IEmailService emailService)
+        public UserController(IUnitOfWork unitOfWork, IAuthService authService, IEmailService emailService, ILogger<UserController> logger)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
             _emailService = emailService;
+            _logger = logger;
+        }
+        [Authorize]
+        [HttpGet(nameof(GetUsers))]
+        public async Task<ActionResult<List<UserDto>>> GetUsers()
+        {
+            try
+            {
+                _logger.LogInformation("Start GetUsers");
+                var users = await _unitOfWork.Users.GetAllAsync();
+                if (!users.Any())
+                {
+                    _logger.LogWarning("Users are not present in the database!");
+                }
+
+                return this.Ok(users);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Failed GetUsers:{e}");
+                return this.BadRequest($"Error retrieving the list of all users:{e.Message}");
+            }
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)

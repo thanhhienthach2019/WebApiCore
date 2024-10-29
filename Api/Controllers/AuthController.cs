@@ -7,6 +7,7 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Api.Controllers
 {
@@ -16,11 +17,13 @@ namespace Api.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
         private readonly TokensService _tokensService;
         private readonly ILogger<AuthController> _logger;
         private readonly string refreshTokenKey;
         private static Dictionary<string, User> _pendingUsers = new Dictionary<string, User>();
-        public AuthController(IUnitOfWork unitOfWork, IAuthService authService, ILogger<AuthController> logger, IConfiguration configuration, TokensService tokensService)
+        public AuthController(IUnitOfWork unitOfWork, IAuthService authService, ILogger<AuthController> logger,
+            IConfiguration configuration, TokensService tokensService, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _authService = authService;
@@ -32,7 +35,6 @@ namespace Api.Controllers
             {
                 refreshTokenKey = refreshTokenSection.Value;
 
-                // Kiểm tra giá trị
                 if (string.IsNullOrEmpty(refreshTokenKey))
                 {
                     _logger.LogWarning("RefreshToken key found but its value is null or empty.");
@@ -40,13 +42,14 @@ namespace Api.Controllers
             }
             else
             {
-                refreshTokenKey = string.Empty; // Hoặc một giá trị mặc định nào đó
+                refreshTokenKey = string.Empty; 
                 _logger.LogWarning("RefreshToken key not found in configuration.");
             }
+            _emailService = emailService;
         }
         [AllowAnonymous]
         [HttpPost(nameof(Login))]
-        public async Task<ActionResult<UserData>> Login([FromBody] AuthDto request)
+        public async Task<ActionResult<UserData>> Login([FromBody] AuthDto request, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
         {
             try
             {
@@ -55,23 +58,31 @@ namespace Api.Controllers
 
                 _logger.LogInformation("Start login");
                 var userData = await _authService.LoginAsync(request, userAgentData);
+                var user = await _authService.GetUserAsync(userData.UserDto.Id);
 
-                if (string.IsNullOrEmpty(userData.DeviceFingerprint) || userData.DeviceFingerprint != request.Fingerprint)
-                {
-                    var user = new User
-                    {
-                        TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString(),
-                        TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime)
-                    };                                        
+                if (string.IsNullOrEmpty(user.DeviceFingerprint) || user.DeviceFingerprint != deviceFingerprint)
+                {                    
+                    user.TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString();
+                    user.TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime);
                     await _unitOfWork.Users.UpdateAsync(user);
                     await _unitOfWork.CompleteAsync();
-                    return this.Ok(new { userDataSend = userData, requiresTwoFactor = true, expiryTime = loginExpiryTime });
+
+                    //await _emailService.SendEmailAsync(user.Email, "Your Two-Factor Authentication Code Login",
+                    //$"Your verification code is: {user.TwoFactorCodeLogin}");
+                    return this.Ok(new { dataSend = userData, requiresTwoFactor = true, expiryTime = loginExpiryTime, TokensData = "" });
                 }
+                _logger.LogInformation("Generate tokens");
+                var tokens = _tokensService.GenerateTokens(userData.UserDto);
+
+                _logger.LogInformation("Save refresh token");
+                await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData);
 
                 _logger.LogInformation("Add refresh token cookie");
-                this.AddRefreshTokenCookie(new Token(), userData);
+                this.AddRefreshTokenCookie(new Token(), tokens);
 
-                return this.Ok(new { userDataSend = userData});
+                tokens.RefreshJwt = "";
+
+                return this.Ok(new { dataSend = userData, requiresTwoFactor = false, expiryTime = 0, TokensData = tokens });
             }
             catch (Exception e)
             {
@@ -89,25 +100,32 @@ namespace Api.Controllers
                     return Unauthorized("User not found");
 
                 _logger.LogInformation("Start VerifyTwoFactorLogin");
-                var twoFactor = await _authService.ValidateTwoFactorLoginCodeAsync(request, userAgentData);
-                                              
+                var twoFactorData = await _authService.ValidateTwoFactorLoginCodeAsync(request, userAgentData);
+
+                _logger.LogInformation("Generate tokens");
+                var tokens = _tokensService.GenerateTokens(twoFactorData.UserDto);
+
+                _logger.LogInformation("Save refresh token");
+                await _tokensService.SaveRefreshTokenAsync(twoFactorData.UserDto.Id, tokens.RefreshJwt, userAgentData);
+
                 _logger.LogInformation("Add refresh token cookie");
-                this.AddRefreshTokenCookie(new Token(), twoFactor);
-                var user = new User
-                {
-                    DeviceFingerprint = deviceFingerprint,
-                };                
+                this.AddRefreshTokenCookie(new Token(), tokens);
+               
+                var user = await _authService.GetUserAsync(twoFactorData.UserDto.Id);
+                user.DeviceFingerprint = deviceFingerprint;
                 await _unitOfWork.Users.UpdateAsync(user);
                 await _unitOfWork.CompleteAsync();
 
-                return Ok(new { StatusLogin = true });
+                tokens.RefreshJwt = "";
+
+                return this.Ok(new { dataSend = twoFactorData, requiresTwoFactor = false, expiryTime = 0, TokensData = tokens });
             }
             catch (Exception e)
             {
                 return this.BadRequest($"Error:{e.Message}");
             }
         }
-        private void AddRefreshTokenCookie(Token refreshToken, UserData userData)
+        private void AddRefreshTokenCookie(Token refreshToken, TokensData tokensData)
         {
             var cookieOptions = new CookieOptions
             {
@@ -115,7 +133,7 @@ namespace Api.Controllers
                 MaxAge = TimeSpan.FromMinutes(refreshToken.LifeTime)
             };
 
-            this.Response.Cookies.Append(this.refreshTokenKey, userData.TokensData.RefreshJwt, cookieOptions);
+            this.Response.Cookies.Append(this.refreshTokenKey, tokensData.RefreshJwt, cookieOptions);
         }
         [AllowAnonymous]
         [HttpPost(nameof(Registration))]
@@ -128,8 +146,14 @@ namespace Api.Controllers
                 _logger.LogInformation("Start registration");
                 var userData = await _authService.RegistrationAsync(request, userAgentData);
 
+                _logger.LogInformation("Generate tokens");
+                var tokens = _tokensService.GenerateTokens(userData.UserDto);
+
+                _logger.LogInformation("Save refresh token");
+                await _tokensService.SaveRefreshTokenAsync(userData.UserDto.Id, tokens.RefreshJwt, userAgentData);
+
                 _logger.LogInformation("Add refresh token cookie");
-                this.AddRefreshTokenCookie(new Token(), userData);
+                this.AddRefreshTokenCookie(new Token(), tokens);
 
                 return this.Ok(userData);
             }
@@ -148,7 +172,7 @@ namespace Api.Controllers
                 if (!cookieIsExist)
                 {
                     _logger.LogError("Refresh token cookie is not found!");
-                    throw new Exception("Куки рефреш токена отсутствуют!");
+                    throw new Exception("Refresh token cookie is not found!");
                 }
 
                 var userAgentData = Utilities.GetUserAgentData(this.Request.Headers["User-Agent"]);
@@ -158,11 +182,14 @@ namespace Api.Controllers
                 _logger.LogInformation("Start refresh");
                 var userData = await _tokensService.RefreshAsync(tokens, userAgentData);
 
+                _logger.LogInformation("Generate tokens");
+                var tokensDto = _tokensService.GenerateTokens(userData.UserDto);
+
                 _logger.LogInformation("Save refresh token");
-                await _tokensService.SaveRefreshTokenAsync(userData!.UserDto.Id, userData.TokensData.RefreshJwt, userAgentData);
+                await _tokensService.SaveRefreshTokenAsync(userData!.UserDto.Id, tokensDto.RefreshJwt, userAgentData);
 
                 _logger.LogInformation("Add refresh token cookie");
-                this.AddRefreshTokenCookie(new Token(), userData);
+                this.AddRefreshTokenCookie(new Token(), tokensDto);
 
                 return this.Ok(userData);
             }

@@ -32,7 +32,8 @@ namespace DataAccess.EFCore
             return new UserAgentData
             {
                 OS = clietnInfo.OS.ToString(),
-                Browser = clietnInfo.UA.ToString()
+                Browser = clietnInfo.UA.ToString(),
+                DeviceFingerprint = clietnInfo.Device.ToString(),
             };
         }
     }

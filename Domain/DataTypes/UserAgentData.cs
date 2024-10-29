@@ -10,5 +10,6 @@ namespace Domain.DataTypes
     {
         public string OS { get; set; }
         public string Browser { get; set; }
+        public string DeviceFingerprint { get; set; }
     }
 }

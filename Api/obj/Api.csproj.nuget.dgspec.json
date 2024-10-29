@@ -180,7 +180,7 @@
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.1.2, )"
             },
             "UAParser": {
               "target": "Package",

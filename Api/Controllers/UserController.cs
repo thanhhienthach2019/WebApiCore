@@ -96,100 +96,13 @@ namespace Api.Controllers
             _pendingUsers.Remove(verifyDto.Email);
 
             return Ok(new { Message = "Registration successful. You can now log in." });
-        }
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
-        {
-            int expiresDay = 7;
-            int loginExpiryTime = 1;
- 
-            var user = await _unitOfWork.Users.GetByUsernameAsync(loginDto.Username);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
-                return Unauthorized("Invalid credentials");
-            if (string.IsNullOrEmpty(user.DeviceFingerprint) || user.DeviceFingerprint != deviceFingerprint)
-            {
-                user.TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString();
-                user.TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime);
-                await _unitOfWork.Users.UpdateAsync(user);
-                await _unitOfWork.CompleteAsync();
-
-                //await _emailService.SendEmailAsync(user.Email, "Your Two-Factor Authentication Code Login",
-                //$"Your verification code is: {user.TwoFactorCodeLogin}");
-
-                //return Ok(new { Message = "Two-factor code login has been sent. Please verify your email." });
-                return Ok(new { requiresTwoFactor = true, expiryTime = loginExpiryTime });
-            }
-                // Generate JWT token
-            var token = await _authService.GenerateJwtToken(user);
-            var refreshToken = await _authService.GenerateRefreshToken(user, expiresDay);
-          
-            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(expiresDay)
-            });
-
-            return Ok(new { Token = token });
-        }
+        }        
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             Response.Cookies.Delete("jwtToken");
             Response.Cookies.Delete("refreshToken");
             return Ok(new { Message = "Đăng xuất thành công." });
-        }
-        [HttpPost("verify-2fa-login")]
-        public async Task<IActionResult> VerifyTwoFactorLogin([FromBody] VerifyTwoFactorDto verifyDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
-        {
-            int timeExpiresDays = 7;
-            var user = await _unitOfWork.Users.GetByUsernameAsync(verifyDto.Email);
-            if (user == null)
-                return Unauthorized("User not found");
-
-            if (!await _authService.ValidateTwoFactorLoginCodeAsync(user, verifyDto.TwoFactorCode))
-                return Unauthorized("Invalid or expired 2FA code");
-            
-            // Generate JWT token
-            var token = await _authService.GenerateJwtToken(user);
-            var refreshToken = await _authService.GenerateRefreshToken(user, timeExpiresDays);
-          
-            Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-            {
-                HttpOnly = true,  // Prevent access via JavaScript
-                Secure = false,    // Ensure the cookie is only sent over HTTPS
-                SameSite = SameSiteMode.None, // Protect against CSRF
-                Expires = DateTime.UtcNow.AddDays(timeExpiresDays) // Cookie expiry time
-            });
-            //Update deviceFingerprint to database
-            user.DeviceFingerprint = deviceFingerprint;
-            await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.CompleteAsync();
-
-            return Ok(new { Token = token, StatusLogin = true });
-        }
-        [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken()
-        {
-            // Lấy refresh token từ cookie
-            var refreshToken = Request.Cookies["refreshToken"];
-
-            if (string.IsNullOrEmpty(refreshToken))
-            {
-                return Unauthorized("Refresh token is missing.");
-            }
-
-            // Gọi auth service để làm mới access token
-            var newAccessToken = await _authService.RefreshToken(refreshToken);
-
-            if (newAccessToken == null)
-            {
-                return Unauthorized("Invalid refresh token.");
-            }
-
-            return Ok(new { accessToken = newAccessToken });  // Trả về access token mới
-        }
-
+        }                
     }
 }

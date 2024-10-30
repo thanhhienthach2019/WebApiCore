@@ -46,18 +46,18 @@ namespace DataAccess.EFCore.Extension
                         try
                         {
                             // Create a new scope to access IAuthService
-                            using (var scope = _serviceProvider.CreateScope())
-                            {
-                                var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-                                var newJwtToken = await authService.RefreshToken(refreshToken);
+                            //using (var scope = _serviceProvider.CreateScope())
+                            //{
+                            //    var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+                            //    var newJwtToken = await authService.RefreshToken(refreshToken);
 
-                                // Send new JWT in the response header to the client
-                                context.Response.Headers["Authorization"] = "Bearer " + newJwtToken;
+                            //    // Send new JWT in the response header to the client
+                            //    context.Response.Headers["Authorization"] = "Bearer " + newJwtToken;
 
-                                // Continue the request with the new token
-                                var user = ValidateJwtToken(newJwtToken);
-                                context.Items["User"] = user;
-                            }
+                            //    // Continue the request with the new token
+                            //    var user = ValidateJwtToken(newJwtToken);
+                            //    context.Items["User"] = user;
+                            //}
                         }
                         catch (UnauthorizedAccessException ex)
                         {

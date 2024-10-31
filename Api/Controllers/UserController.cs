@@ -45,6 +45,7 @@ namespace Api.Controllers
                 return this.BadRequest($"Error retrieving the list of all users:{e.Message}");
             }
         }
+        [Authorize]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
         {

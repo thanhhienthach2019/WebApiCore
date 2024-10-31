@@ -61,7 +61,7 @@ namespace Api.Controllers
                 var user = await _authService.GetUserAsync(userData.UserDto.Id);
 
                 if (string.IsNullOrEmpty(user.DeviceFingerprint) || user.DeviceFingerprint != deviceFingerprint)
-                {                    
+                {
                     user.TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString();
                     user.TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime);
                     await _unitOfWork.Users.UpdateAsync(user);
@@ -137,14 +137,14 @@ namespace Api.Controllers
         }
         [AllowAnonymous]
         [HttpPost(nameof(Registration))]
-        public async Task<ActionResult<UserData>> Registration([FromBody] AuthDto request)
+        public async Task<ActionResult<UserData>> Registration([FromBody] AuthDto request, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
         {
             try
             {
                 var userAgentData = Utilities.GetUserAgentData(this.Request.Headers["User-Agent"]);
 
                 _logger.LogInformation("Start registration");
-                var userData = await _authService.RegistrationAsync(request, userAgentData);
+                var userData = await _authService.RegistrationAsync(request, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Generate tokens");
                 var tokens = _tokensService.GenerateTokens(userData.UserDto);
@@ -155,7 +155,9 @@ namespace Api.Controllers
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokens);
 
-                return this.Ok(userData);
+                tokens.RefreshJwt = "";
+
+                return this.Ok(new { dataSend = userData, requiresTwoFactor = false, expiryTime = 0, TokensData = tokens });
             }
             catch (Exception e)
             {
@@ -191,7 +193,7 @@ namespace Api.Controllers
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokensDto);
 
-                return this.Ok(userData);
+                return this.Ok(new { dataSend = userData, requiresTwoFactor = false, expiryTime = 0, TokensData = tokensDto });
             }
             catch
             {

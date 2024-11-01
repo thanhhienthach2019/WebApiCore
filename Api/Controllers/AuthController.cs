@@ -20,7 +20,8 @@ namespace Api.Controllers
         private readonly IEmailService _emailService;
         private readonly TokensService _tokensService;
         private readonly ILogger<AuthController> _logger;
-        private readonly string refreshTokenKey;
+        private readonly string _key_refreshCookiesToken;
+        private readonly string _key_accessCookiesToken;
         private static Dictionary<string, User> _pendingUsers = new Dictionary<string, User>();
         public AuthController(IUnitOfWork unitOfWork, IAuthService authService, ILogger<AuthController> logger,
             IConfiguration configuration, TokensService tokensService, IEmailService emailService)
@@ -31,19 +32,35 @@ namespace Api.Controllers
             _tokensService = tokensService;
             var refreshTokenSection = configuration.GetSection("CookiesNames").GetChildren()
                                             .FirstOrDefault(c => c.Key.Equals("RefreshToken"));
+            var accessTokenSection = configuration.GetSection("CookiesNames").GetChildren()
+                                            .FirstOrDefault(c => c.Key.Equals("AccessToken"));
             if (refreshTokenSection != null)
             {
-                refreshTokenKey = refreshTokenSection.Value;
+                _key_refreshCookiesToken = refreshTokenSection.Value;
 
-                if (string.IsNullOrEmpty(refreshTokenKey))
+                if (string.IsNullOrEmpty(_key_refreshCookiesToken))
                 {
                     _logger.LogWarning("RefreshToken key found but its value is null or empty.");
                 }
             }
             else
             {
-                refreshTokenKey = string.Empty; 
+                _key_refreshCookiesToken = string.Empty; 
                 _logger.LogWarning("RefreshToken key not found in configuration.");
+            }
+            if (accessTokenSection != null)
+            {
+                _key_accessCookiesToken = accessTokenSection.Value;
+
+                if (string.IsNullOrEmpty(_key_accessCookiesToken))
+                {
+                    _logger.LogWarning("AccessToken key found but its value is null or empty.");
+                }
+            }
+            else
+            {
+                _key_accessCookiesToken = string.Empty;
+                _logger.LogWarning("AccessToken key not found in configuration.");
             }
             _emailService = emailService;
         }
@@ -75,7 +92,7 @@ namespace Api.Controllers
                 var tokens = _tokensService.GenerateTokens(userData.UserDto);
 
                 _logger.LogInformation("Save refresh token");
-                await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData);
+                await _tokensService.SaveRefreshTokenAsync(user.Id, tokens.RefreshJwt, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokens);
@@ -106,7 +123,7 @@ namespace Api.Controllers
                 var tokens = _tokensService.GenerateTokens(twoFactorData.UserDto);
 
                 _logger.LogInformation("Save refresh token");
-                await _tokensService.SaveRefreshTokenAsync(twoFactorData.UserDto.Id, tokens.RefreshJwt, userAgentData);
+                await _tokensService.SaveRefreshTokenAsync(twoFactorData.UserDto.Id, tokens.RefreshJwt, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokens);
@@ -127,13 +144,21 @@ namespace Api.Controllers
         }
         private void AddRefreshTokenCookie(Token refreshToken, TokensData tokensData)
         {
-            var cookieOptions = new CookieOptions
+            var refreshCookieOptions = new CookieOptions
             {
                 Expires = refreshToken.Expired,
-                MaxAge = TimeSpan.FromMinutes(refreshToken.LifeTime)
+                MaxAge = TimeSpan.FromDays(refreshToken.LifeTime)
             };
 
-            this.Response.Cookies.Append(this.refreshTokenKey, tokensData.RefreshJwt, cookieOptions);
+            this.Response.Cookies.Append(this._key_refreshCookiesToken, tokensData.RefreshJwt, refreshCookieOptions);
+
+            var accessCookieOptions = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddMinutes(AccessTokenOptions.LIFETIME),
+                MaxAge = TimeSpan.FromMinutes(AccessTokenOptions.LIFETIME),
+            };
+            
+            this.Response.Cookies.Append(this._key_accessCookiesToken, tokensData.AccessJwt, accessCookieOptions);
         }
         [AllowAnonymous]
         [HttpPost(nameof(Registration))]
@@ -150,7 +175,7 @@ namespace Api.Controllers
                 var tokens = _tokensService.GenerateTokens(userData.UserDto);
 
                 _logger.LogInformation("Save refresh token");
-                await _tokensService.SaveRefreshTokenAsync(userData.UserDto.Id, tokens.RefreshJwt, userAgentData);
+                await _tokensService.SaveRefreshTokenAsync(userData.UserDto.Id, tokens.RefreshJwt, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokens);
@@ -166,11 +191,11 @@ namespace Api.Controllers
         }
         [AllowAnonymous]
         [HttpPut(nameof(Refresh))]
-        public async Task<ActionResult<UserData>> Refresh([FromBody] string accessToken)
+        public async Task<ActionResult<UserData>> Refresh([FromBody] string accessToken, [FromHeader(Name = "device-fingerprint")] string deviceFingerprint)
         {
             try
             {
-                var cookieIsExist = this.Request.Cookies.TryGetValue(this.refreshTokenKey, out var refreshTokenValue);
+                var cookieIsExist = this.Request.Cookies.TryGetValue(this._key_refreshCookiesToken, out var refreshTokenValue);
                 if (!cookieIsExist)
                 {
                     _logger.LogError("Refresh token cookie is not found!");
@@ -182,13 +207,13 @@ namespace Api.Controllers
                 var tokens = new TokensData { AccessJwt = accessToken, RefreshJwt = refreshTokenValue! };
 
                 _logger.LogInformation("Start refresh");
-                var userData = await _tokensService.RefreshAsync(tokens, userAgentData);
+                var userData = await _tokensService.RefreshAsync(tokens, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Generate tokens");
                 var tokensDto = _tokensService.GenerateTokens(userData.UserDto);
 
                 _logger.LogInformation("Save refresh token");
-                await _tokensService.SaveRefreshTokenAsync(userData!.UserDto.Id, tokensDto.RefreshJwt, userAgentData);
+                await _tokensService.SaveRefreshTokenAsync(userData!.UserDto.Id, tokensDto.RefreshJwt, userAgentData, deviceFingerprint);
 
                 _logger.LogInformation("Add refresh token cookie");
                 this.AddRefreshTokenCookie(new Token(), tokensDto);
@@ -206,7 +231,7 @@ namespace Api.Controllers
         {
             try
             {
-                var cookieExist = this.Request.Cookies.TryGetValue(this.refreshTokenKey, out var refreshTokenValue);
+                var cookieExist = this.Request.Cookies.TryGetValue(this._key_refreshCookiesToken, out var refreshTokenValue);
                 if (!cookieExist)
                 {
                     _logger.LogError("Refresh token cookie is not found!");
@@ -217,7 +242,7 @@ namespace Api.Controllers
                 await _authService.LogoutAsync(refreshTokenValue!);
 
                 _logger.LogInformation("Delete Refresh token cookie");
-                this.Response.Cookies.Delete(this.refreshTokenKey);
+                this.Response.Cookies.Delete(this._key_refreshCookiesToken);
 
                 return this.Ok();
             }

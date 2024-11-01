@@ -28,10 +28,10 @@ namespace DataAccess.EFCore.Repositories.Service
         public async Task SaveRefreshTokenAsync(
             Guid userId,
             string refreshToken,
-            UserAgentData userAgentData)
+            UserAgentData userAgentData, string DeviceFingerprint)
         {
             var userToken = await _unitOfWork.Tokens
-                                             .GetTokenByUserAndUserAgentAsync(userId, userAgentData);
+                                             .GetTokenByUserAndUserAgentAsync(userId, userAgentData, DeviceFingerprint);
 
             if (userToken is not null)
             {
@@ -39,13 +39,13 @@ namespace DataAccess.EFCore.Repositories.Service
 
                 userToken.RefreshToken = refreshToken;
                 userToken.Created = now;
-                userToken.Expired = now.AddMinutes(userToken.LifeTime);
+                userToken.Expired = now.AddDays(5);//AddMinutes(userToken.LifeTime)
 
                 await _unitOfWork.CompleteAsync();
             }
             else
             {
-                await _unitOfWork.Tokens.AddTokenAsync(userId, refreshToken, userAgentData.OS, userAgentData.Browser, userAgentData.DeviceFingerprint);
+                await _unitOfWork.Tokens.AddTokenAsync(userId, refreshToken, userAgentData.OS, userAgentData.Browser, DeviceFingerprint);
                 await _unitOfWork.CompleteAsync();
             }
         }
@@ -95,7 +95,7 @@ namespace DataAccess.EFCore.Repositories.Service
         }
         public async Task<UserData?> RefreshAsync(
             TokensData tokens,
-            UserAgentData userAgentData)
+            UserAgentData userAgentData, string deviceFingerprint)
         {
             if (!await ValidateAccessTokenAsync(tokens.AccessJwt))
             {
@@ -110,7 +110,7 @@ namespace DataAccess.EFCore.Repositories.Service
             }
 
             var user = await _unitOfWork.Tokens
-                                 .GetUserByRefreshTokenAndUserAgentAsync(tokens, userAgentData);
+                                 .GetUserByRefreshTokenAndUserAgentAsync(tokens, userAgentData, deviceFingerprint);
 
             if (user is null)
             {
@@ -126,7 +126,7 @@ namespace DataAccess.EFCore.Repositories.Service
         private string GenerateAccessToken(UserDto user)
         {
             var now = DateTime.UtcNow;
-            var expires = now.Add(TimeSpan.FromSeconds(AccessTokenOptions.LIFETIME));
+            var expires = now.Add(TimeSpan.FromMinutes(AccessTokenOptions.LIFETIME));
 
             var claims = new List<Claim>
             {
@@ -153,7 +153,7 @@ namespace DataAccess.EFCore.Repositories.Service
             var securityToken = (JwtSecurityToken)tokenHandler.ReadToken(accessToken);
             var claimValue = securityToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(), out var validatedToken);
+            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(true), out var validatedToken);
 
             var claims = claimsPrincipal.Claims.ToList();
 

@@ -12,7 +12,7 @@ namespace DataAccess.EFCore
         public const string ISSUER = "_hien_key/authServer"; 
         public const string AUDIENCE = "_hien_key/authClient"; 
         private const string KEY = "hienKeyToken/k64zY35P6gVRuHpKHkF4uHNs5YI/5EgEN3NNY0tncXU="; 
-        public const int LIFETIME = 30; 
+        public const int LIFETIME = 1; 
 
         public static SymmetricSecurityKey GetSymmetricSecurityKey() => new SymmetricSecurityKey(Encoding.ASCII.GetBytes(KEY));
     }

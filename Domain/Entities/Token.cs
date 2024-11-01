@@ -31,11 +31,11 @@ namespace Domain.Entities
         public DateTime Expired { get; set; }
 
         [Required]
-        public int LifeTime { get; set; } = 2;
+        public int LifeTime { get; set; } = 7;
 
         public Token()
         {
-            this.Expired = this.Created.AddMinutes(this.LifeTime);
+            this.Expired = this.Created.AddDays(this.LifeTime);
         }
     }
 }

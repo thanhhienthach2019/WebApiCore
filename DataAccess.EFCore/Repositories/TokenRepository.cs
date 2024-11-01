@@ -12,23 +12,23 @@ namespace DataAccess.EFCore.Repositories
         {
             _context = context;
         }
-        public async Task<Token?> GetTokenByUserAndUserAgentAsync(Guid userId, UserAgentData userAgentData)
+        public async Task<Token?> GetTokenByUserAndUserAgentAsync(Guid userId, UserAgentData userAgentData, string DeviceFingerprint)
         {
             // Truy vấn để lấy token dựa vào userId và thông tin UserAgent
             return await _context.Tokens
                                  .Include(t => t.UserAgent) // Đảm bảo rằng UserAgent đã được include
                                  .FirstOrDefaultAsync(t => t.UserID.Equals(userId)
                                                            && t.UserAgent.OS.Equals(userAgentData.OS)
-                                                           && t.UserAgent.DeviceFingerprint.Equals(userAgentData.DeviceFingerprint)
+                                                           && t.UserAgent.DeviceFingerprint.Equals(DeviceFingerprint)
                                                            && t.UserAgent.Browser.Equals(userAgentData.Browser));
         }
-        public async Task<User?> GetUserByRefreshTokenAndUserAgentAsync(TokensData tokens, UserAgentData userAgentData)
+        public async Task<User?> GetUserByRefreshTokenAndUserAgentAsync(TokensData tokens, UserAgentData userAgentData, string DeviceFingerprint)
         {
             var user = await _context.Tokens
                 .Include(t => t.UserAgent)
                                  .Where(t => t.RefreshToken.Equals(tokens.RefreshJwt)
                                              && t.UserAgent.OS.Equals(userAgentData.OS)
-                                             && t.UserAgent.DeviceFingerprint.Equals(userAgentData.DeviceFingerprint)
+                                             && t.UserAgent.DeviceFingerprint.Equals(DeviceFingerprint)
                                              && t.UserAgent.Browser.Equals(userAgentData.Browser))
                                  .Select(t => t.User)
                                  .FirstOrDefaultAsync(); ;

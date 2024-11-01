@@ -59,7 +59,8 @@ builder.Services.AddAuthentication(options =>
     //    RequireExpirationTime = true,
     //};
 });
-var clientUrl = builder.Configuration.GetSection("URLS").GetChildren().First(c => c.Key.Equals("ClientUrl")).Value;
+//var clientUrl = builder.Configuration.GetSection("URLS").GetChildren().First(c => c.Key.Equals("ClientUrl")).Value;
+var clientUrl = builder.Configuration.GetSection("URLS:ClientUrl").Get<string[]>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",

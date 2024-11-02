@@ -35,6 +35,15 @@ namespace DataAccess.EFCore.Repositories
 
             return user;
         }
+        public async Task<bool> DoesDeviceFingerprintExistAsync(Guid userId, UserAgentData userAgentData, string deviceFingerprint)
+        {            
+            return await _context.Tokens
+                                 .AnyAsync(t => t.UserID.Equals(userId)
+                                                && t.UserAgent.OS.Equals(userAgentData.OS)
+                                                && t.UserAgent.Browser.Equals(userAgentData.Browser)
+                                                && t.UserAgent.DeviceFingerprint.Equals(deviceFingerprint));
+        }
+
         public async Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser, string DeviceFingerprint)
         {
             var newToken = new Token

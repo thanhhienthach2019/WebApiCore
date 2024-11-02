@@ -39,7 +39,7 @@ namespace DataAccess.EFCore.Repositories.Service
 
                 userToken.RefreshToken = refreshToken;
                 userToken.Created = now;
-                userToken.Expired = now.AddDays(5);//AddMinutes(userToken.LifeTime)
+                userToken.Expired = now.AddDays(7);//AddMinutes(userToken.LifeTime)
 
                 await _unitOfWork.CompleteAsync();
             }
@@ -61,12 +61,19 @@ namespace DataAccess.EFCore.Repositories.Service
         }
         private string GenerateRefreshToken()
         {
-            var randomNumber = new byte[32];
-
+            var randomNumber = new byte[64];
             using (var generator = RandomNumberGenerator.Create())
             {
                 generator.GetBytes(randomNumber);
-                return Convert.ToBase64String(randomNumber);
+            }
+
+            string base64Token = Convert.ToBase64String(randomNumber);
+
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(base64Token));
+                string hashedToken = Convert.ToBase64String(hashBytes);
+                return hashedToken;
             }
         }
         public async Task<string> RemoveRefreshTokenAsync(string refreshToken)
@@ -93,9 +100,7 @@ namespace DataAccess.EFCore.Repositories.Service
                 await _unitOfWork.CompleteAsync();
             }
         }
-        public async Task<UserData?> RefreshAsync(
-            TokensData tokens,
-            UserAgentData userAgentData, string deviceFingerprint)
+        public async Task<UserData?> RefreshAsync(TokensData tokens, UserAgentData userAgentData, string deviceFingerprint)
         {
             if (!await ValidateAccessTokenAsync(tokens.AccessJwt))
             {
@@ -153,7 +158,7 @@ namespace DataAccess.EFCore.Repositories.Service
             var securityToken = (JwtSecurityToken)tokenHandler.ReadToken(accessToken);
             var claimValue = securityToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(true), out var validatedToken);
+            var claimsPrincipal = tokenHandler.ValidateToken(accessToken, GetTokenValidationParameters(), out var validatedToken);
 
             var claims = claimsPrincipal.Claims.ToList();
 

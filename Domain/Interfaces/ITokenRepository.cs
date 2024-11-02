@@ -13,6 +13,7 @@ namespace Domain.Interfaces
         Task<Token?> GetTokenByUserAndUserAgentAsync(Guid userId, UserAgentData userAgentData, string DeviceFingerprint);
         Task<User?> GetUserByRefreshTokenAndUserAgentAsync(TokensData tokens, UserAgentData userAgentData, string DeviceFingerprint);
         Task AddTokenAsync(Guid userId, string refreshToken, string OS, string Browser, string DeviceFingerprint);
+        Task<bool> DoesDeviceFingerprintExistAsync(Guid userId, UserAgentData userAgentData, string deviceFingerprint);
         Task<IEnumerable<Token>> GetExpiredTokensAsync();
     }
 }

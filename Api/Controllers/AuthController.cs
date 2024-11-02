@@ -16,7 +16,7 @@ namespace Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IAuthService _authService;
+        private readonly IAuthService _authService;        
         private readonly IEmailService _emailService;
         private readonly TokensService _tokensService;
         private readonly ILogger<AuthController> _logger;
@@ -29,11 +29,9 @@ namespace Api.Controllers
             _unitOfWork = unitOfWork;
             _authService = authService;
             _logger = logger;
-            _tokensService = tokensService;
+            _tokensService = tokensService;            
             var refreshTokenSection = configuration.GetSection("CookiesNames").GetChildren()
-                                            .FirstOrDefault(c => c.Key.Equals("RefreshToken"));
-            var accessTokenSection = configuration.GetSection("CookiesNames").GetChildren()
-                                            .FirstOrDefault(c => c.Key.Equals("AccessToken"));
+                                            .FirstOrDefault(c => c.Key.Equals("RefreshToken"));            
             if (refreshTokenSection != null)
             {
                 _key_refreshCookiesToken = refreshTokenSection.Value;
@@ -47,21 +45,7 @@ namespace Api.Controllers
             {
                 _key_refreshCookiesToken = string.Empty; 
                 _logger.LogWarning("RefreshToken key not found in configuration.");
-            }
-            if (accessTokenSection != null)
-            {
-                _key_accessCookiesToken = accessTokenSection.Value;
-
-                if (string.IsNullOrEmpty(_key_accessCookiesToken))
-                {
-                    _logger.LogWarning("AccessToken key found but its value is null or empty.");
-                }
-            }
-            else
-            {
-                _key_accessCookiesToken = string.Empty;
-                _logger.LogWarning("AccessToken key not found in configuration.");
-            }
+            }            
             _emailService = emailService;
         }
         [AllowAnonymous]
@@ -76,8 +60,8 @@ namespace Api.Controllers
                 _logger.LogInformation("Start login");
                 var userData = await _authService.LoginAsync(request, userAgentData);
                 var user = await _authService.GetUserAsync(userData.UserDto.Id);
-
-                if (string.IsNullOrEmpty(user.DeviceFingerprint) || user.DeviceFingerprint != deviceFingerprint)
+                var checkExistDeviceFinger = await _unitOfWork.Tokens.DoesDeviceFingerprintExistAsync(userData.UserDto.Id, userAgentData, deviceFingerprint);
+                if (!checkExistDeviceFinger)
                 {
                     user.TwoFactorCodeLogin = new Random().Next(100000, 999999).ToString();
                     user.TwoFactorLoginExpiryTime = DateTime.Now.AddMinutes(loginExpiryTime);
@@ -150,15 +134,7 @@ namespace Api.Controllers
                 MaxAge = TimeSpan.FromDays(refreshToken.LifeTime)
             };
 
-            this.Response.Cookies.Append(this._key_refreshCookiesToken, tokensData.RefreshJwt, refreshCookieOptions);
-
-            var accessCookieOptions = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddMinutes(AccessTokenOptions.LIFETIME),
-                MaxAge = TimeSpan.FromMinutes(AccessTokenOptions.LIFETIME),
-            };
-            
-            this.Response.Cookies.Append(this._key_accessCookiesToken, tokensData.AccessJwt, accessCookieOptions);
+            this.Response.Cookies.Append(this._key_refreshCookiesToken, tokensData.RefreshJwt, refreshCookieOptions);            
         }
         [AllowAnonymous]
         [HttpPost(nameof(Registration))]
